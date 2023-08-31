@@ -110,6 +110,7 @@ def parse_references(resp_body: str, host: str):
     """
     refs: set = set()
     for tag in resp_body.split('<'):
+        # Modified version of https://www.i2tutorials.com/match-urls-using-regular-expressions-in-python/
         # Three capturing groups using quantifiers to support domains of varying length and extending parameters/fragments/port specifications
         for uri in re.findall(r'(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?', tag):
             refs.add(uri[1] + uri[2])

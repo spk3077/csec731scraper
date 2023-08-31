@@ -13,6 +13,7 @@ import certifi
 import re
 
 CRLF = "\r\n"
+# URI_ATTRIBUTES no longer necessary with regex
 URI_ATTRIBUTES: set = {
     'action=',
     'archive=',
@@ -53,7 +54,6 @@ def generate_request(url: str, host: str) -> str:
     req += "Accept-Encoding: identity" + CRLF
     req += "Accept-Language: en-US,en;q=0.9" + CRLF
     req += "Connection: close" + CRLF + CRLF
-    print(req)
     return req
 
 
@@ -69,7 +69,6 @@ def send_receive(req: str, host: str) -> tuple[str, str]:
     conn_type: str = sys.argv[1].split("://")[0]
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
-    print(conn_type)
     if conn_type == "http":
         conn.connect((host, 80))
         conn.send(req.encode())
@@ -111,17 +110,32 @@ def parse_references(resp_body: str, host: str):
     """
     refs: set = set()
     for tag in resp_body.split('<'):
-        for attr in URI_ATTRIBUTES:
-            if attr not in tag and "http" not in tag:
-                continue
-            parsed_text: str = tag[tag.find(attr) + len(attr):]
-            # parsed_text = parsed_text[parsed_text.find()]
-            print(re.findall(r'(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?', parsed_text))
-            print()
-            print("DOG")
+        # Three capturing groups using quantifiers to support domains of varying length and extending parameters/fragments/port specifications
+        for uri in re.findall(r'(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?', tag):
+            refs.add(uri[1])
     
     refs.discard(host)
+    return refs
 
+
+def print_output(refs: set):
+    """
+    print_output formats the unique references into output acceptable for assignment
+
+    :param refs: set of references located
+    :return: Nothing
+    """
+    print()
+    print("UNIQUE EXTERNAL REFERENCE DOMAINS:")
+    print("==========================================")
+    if len(refs) <= 0:
+        print("NONE FOUND")
+        
+    for ref in sorted(refs):
+        print(ref)
+    
+    print()
+    print("TOTAL OF " + str(len(refs)) + " UNIQUE EXTERNAL REFERENCES")
 
 def main():
     """
@@ -142,10 +156,12 @@ def main():
     url = sys.argv[1].split("//")[1]
     host = url.split("/")[0]
 
+    
     req: str = generate_request(url, host)
     resp_headers, resp_body = send_receive(req, host)
     
     refs: set = parse_references(resp_body, host)
+    print_output(refs)
 
 
 main()

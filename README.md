@@ -3,6 +3,30 @@ CSEC-731 Web Scraper Project
 
 ## Assumptions
  - External references listed in HTTP Response headers do not qualify
+ - Assignment desires ALL **EXTERNAL REFERENCES** hence filtering by attributes accepting URIs is insufficient...  The code provides these relevant attributes regardless
+ - Collects references located in scripts
+
+
+ ## URI Accepting Attributes
+ - action
+ - archive
+ - background
+ - cite
+ - classid
+ - codebase
+ - data
+ - formaction
+ - href
+ - icon
+ - itemtype
+ - longdesc
+ - manifest
+ - poster
+ - profile
+ - src
+ - srcset
+ - usemap
+ - xmlns
 
 ## Install
     # Clone the repository

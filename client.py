@@ -112,7 +112,7 @@ def parse_references(resp_body: str, host: str):
     for tag in resp_body.split('<'):
         # Three capturing groups using quantifiers to support domains of varying length and extending parameters/fragments/port specifications
         for uri in re.findall(r'(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?', tag):
-            refs.add(uri[1])
+            refs.add(uri[1] + uri[2])
     
     refs.discard(host)
     return refs

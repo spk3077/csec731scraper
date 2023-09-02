@@ -164,5 +164,4 @@ def main():
     refs: set = parse_references(resp_body, host)
     print_output(refs)
 
-
 main()

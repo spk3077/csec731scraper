@@ -9,8 +9,8 @@ import sys
 import socket
 import ssl
 import certifi
-
 import re
+import time
 
 CRLF = "\r\n"
 # URI_ATTRIBUTES no longer necessary with regex
@@ -77,6 +77,9 @@ def send_receive(req: str, host: str) -> tuple[str, str]:
         temp_resp = conn.recv(8192).decode("UTF-8", errors = "ignore")
         while temp_resp != "":
             response += temp_resp
+            
+            # Wait for more content to load
+            time.sleep(0.05)
             temp_resp = conn.recv(8192).decode("UTF-8", errors = "ignore")
         print("SOCKET CLOSING...")
         conn.close()
@@ -91,12 +94,15 @@ def send_receive(req: str, host: str) -> tuple[str, str]:
         temp_resp = s_conn.recv(8192).decode("UTF-8", errors = "ignore")
         while temp_resp != "":
             response += temp_resp
+
+            # Wait for more content to load
+            time.sleep(0.05)
             temp_resp = s_conn.recv(8192).decode("UTF-8", errors = "ignore")
         print("SOCKET CLOSING...")
         conn.close()
-    
+        
     resp_headers = response.split(CRLF + CRLF)[0].strip()
-    resp_body = response.split(CRLF + CRLF)[1].strip()
+    resp_body = "".join(response.split(CRLF + CRLF)[1:]).strip()
     return resp_headers, resp_body
 
 
@@ -113,9 +119,9 @@ def parse_references(resp_body: str, host: str):
         # Modified version of https://www.i2tutorials.com/match-urls-using-regular-expressions-in-python/
         # Three capturing groups using quantifiers to support domains of varying length and extending parameters/fragments/port specifications
         for uri in re.findall(r'(http|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&:/~\+#]*[\w\-\@?^=%&/~\+#])?', tag):
-            refs.add(uri[1] + uri[2])
+            if uri[1] != host:
+                refs.add(uri[1] + uri[2])
     
-    refs.discard(host)
     return refs
 
 
